@@ -1,0 +1,154 @@
+---
+title: "Introduction to R - DANC"
+author: "[your name here]"
+date: "4 March 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This is an RMarkdown file. It's a very useful format to use if you want to run code in between paragraphs of writing. **Whole scientific papers can be written in RMarkdown**, so keep this in mind for any future work!
+
+We'll start sectioning off our document now.
+
+### 0. Set up
+
+First, we'll load in our packages (libraries) and data. We'll add in a chunk of code to do this.
+
+
+
+The shortcut for adding code chunks in RMarkdown is Cmd + Option + I (Mac) or Ctrl + Alt + I (Windows). I've already put the code chunks where they're supposed to go, but practice using this shortcut.
+
+```{r warning = FALSE, message = FALSE}
+# add in libraries
+# library() is for adding in packages
+
+
+
+# add in data
+
+
+```
+
+Today we'll be relying on the [Tidyverse](https://www.tidyverse.org/) for most of our data exploration and visualization. One of the most useful tools in the tidyverse is the pipe operator, which looks like this: `%>%`. This allows you to string together functions, and we'll be using it a lot in this workshop. The shortcut for the operator is Cmd + Shift + M (Mac) and Ctrl + Shift + M (Windows).
+
+### 1. Cleaning up
+
+If you look at the object `urchins`, you'll see that the column names have capitals and spaces. We don't want to have to type all those out, so we can use the function `janitor::clean_names()` to clean them up.
+
+```{r}
+
+```
+
+### 2. Basic statistics
+
+The first step to data analysis is basic statistics. These allow you to gather information to calculate statistical relationships down the line. We'll start by calculating the average mass of urchins by species on the reefs.
+
+```{r}
+
+```
+
+This is not exactly what we want - `av_mass` is now the average mass of all urchins we measured. The equivalent in Excel would be if you had calculated the mean of all the values in the column for mass and had not used the filter tabs to select the values that you wanted.
+
+We can filter values in R (reproducibly!) using `dplyr::filter()`.
+
+```{r}
+
+```
+
+Let's do the same thing for the other urchin species, _Diadema savignyi_. 
+```{r}
+
+```
+
+We went through the same steps of filtering for the species, then calculating the mean. This is easy enough with 2 species of urchin, but what if you had 20 different species? You wouldn't want to do this for each of those species individually - it would be way too messy. However, we can use a function called `dplyr::group_by` to tell R, "I want you to consider these groups in my data, and apply a function to these groups separately." 
+
+Let's do that with the urchin data.
+
+```{r}
+
+```
+
+We're getting closer. We want to have average masses of each species at each site, but we can use `group_by()` in the same way.
+
+```{r}
+
+```
+
+Now we have means, but what about standard error?
+
+```{r}
+
+```
+
+### 3. Visualization
+
+To create a bar graph, we'll use the `ggplot2` package in the Tidyverse. You can make graphs in baseR (the built-in option), but `ggplot2` allows a lot more customization.
+
+```{r}
+
+```
+
+In this example, the `fill` call tells R, "These are groups that I want to graph separately."
+
+We won't go through all the code for this graph, but you can format this professionally for publication using functions within `ggplot()`.
+
+```{r}
+mass_plot_pub <- ggplot(final, aes(x = reef_habitat, y = mean, fill = sea_urchin_species)) +
+  geom_col(position = "dodge", width = 0.8) +
+  geom_errorbar(aes(ymin = mean - err, ymax = mean + err), position = position_dodge(0.8), width = 0.3) +
+  scale_y_continuous(expand = c(0,0), limits = c(0, 26)) +
+  scale_fill_manual(values = c("#616161", "#adadad")) +
+  theme_minimal() +
+  labs(x = "Reef Habitat",
+       y = "Average mass", 
+       fill = "Urchin species")
+
+mass_plot_pub
+```
+
+Now, we can create a scatterplot. The first thing we'll have to do is filter the `urchins2` data frame to only include observations from the back reef.
+
+```{r}
+
+```
+
+Now we can use this data frame to feed into ggplot.
+
+```{r}
+
+```
+
+Here's the code for making this plot look professional:
+
+```{r}
+scatter_pub <- ggplot(back_reef, aes(x = sea_urchin_mass_g, y = sea_urchin_spine_length_cm)) +
+  geom_point(size = 2) +
+  geom_smooth(method = lm, colour = "black") +
+  theme_minimal() +
+  labs(x = "Sea urchin mass (g)",
+       y = "Sea urchin spine length (cm)")
+
+scatter_pub
+```
+
+### 4. Cooler visualizations
+
+What if you wanted to see what trends between mass and spine length were for both species in the back reef?
+
+```{r}
+scatter_new <- ggplot(urchins2, aes(x = sea_urchin_mass_g, y = sea_urchin_spine_length_cm, group = sea_urchin_species)) +
+  facet_wrap(~reef_habitat) +
+  geom_point(aes(shape = sea_urchin_species), size = 2, alpha = 0.8) +
+  scale_shape_manual(values = c(16, 2)) +
+  geom_smooth(method = lm, color = "red") +
+  theme_minimal() +
+  labs(x = "Sea urchin mass (g)", 
+       y = "Sea urchin spine length (cm)",
+       shape = "Sea urchin species")
+
+scatter_new
+```
+
