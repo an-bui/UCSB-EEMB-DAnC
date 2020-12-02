@@ -1,0 +1,245 @@
+---
+title: "UCSB DAnC Intro to R part 3"
+author: "[your name here]"
+date: "3 December 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 0. Set up
+```{r}
+# libraries
+library(tidyverse)
+library(janitor)
+
+# data
+urchins <- read_csv("sea-urchin.csv")
+```
+
+# 1. Review of Intro to R part 2: 
+
+## a. cleaning up column names
+
+Here, we cleaned up those column names so that they were easier to type out - a small step, but important down the line.
+
+```{r}
+# use janitor::clean_names() function to change the column names to 
+# 1) not have spaces and 2) not be capitalized
+urchins2 <- urchins %>% 
+  clean_names() 
+
+urchins2
+```
+
+## b. Basic statistics
+
+Now, we can calculate the mean mass of urchins - again, something you can do in Excel, but is **reproducible** when you're doing it in R. 
+
+```{r}
+# calculate mean mass of urchins using dplyr::summarize() function
+av_mass <- urchins2 %>% 
+  summarize(mean = mean(sea_urchin_mass_g))  
+
+av_mass
+```
+
+## c. Using `dplyr::filter()` function to subset data
+
+Let's say we only want to calculate the mean mass for urchins in the species that we're actually interested in. We'll start with _Echinometra mathaei_.
+```{r}
+# filter urchins to only include the species of interest, "Echinometra mathaei"
+EM_only <- urchins2 %>% 
+  filter(sea_urchin_species == "Echinometra mathaei")
+
+# look at the data frame
+view(EM_only)
+
+# calculate mean mass
+EM_mass <- EM_only %>% 
+  summarize(mean = mean(sea_urchin_mass_g))
+
+# look at the main mass of E. mathaei
+view(EM_mass)
+```
+
+Remember that you can use the pipe operator to string those functions together.
+
+```{r}
+# so what you're telling R is to:
+# 1. use the urchins2 data frame
+EM_mass2 <- urchins2 %>% 
+  # 2. filter the data frame to only include E. mathaei
+  filter(sea_urchin_species == "Echinometra mathaei") %>%
+  # 3. calculate the mean mass
+  summarize(mean = mean(sea_urchin_mass_g))
+
+# print the output of that pipe
+EM_mass2
+```
+
+Now, we can do the same thing with the other urchin species, _Diadema savignyi_.
+```{r}
+# doing the same thing with the other urchin species, Diadema savignyi.
+DS_mass <- urchins2 %>% 
+  filter(sea_urchin_species == "Diadema savignyi") %>% 
+  summarize(mean = mean(sea_urchin_mass_g))
+
+DS_mass
+```
+
+## d. Creating the final data frame
+
+We're using the word "final" to refer to the data frame that you want to get to in order to start making figures from the data.
+
+```{r}
+# 1. use urchins2 data frame
+final <- urchins2 %>% 
+  # use group_by() to tell R to consider different groups in the data:
+  # 1) reef habitat, and 2) urchin species
+  group_by(reef_habitat, sea_urchin_species) %>% 
+  # use summarize() to calculate the mean urchin mass and the standard error
+  summarize(mean = mean(sea_urchin_mass_g), 
+            err = sd(sea_urchin_mass_g)/sqrt(length(sea_urchin_mass_g))) 
+
+final
+```
+
+# 2. Data visualization
+
+To create a bar graph, we'll use the `ggplot2` package in the Tidyverse. You can make graphs in baseR (the built-in option), but `ggplot2` allows a lot more customization.
+
+```{r}
+mass_plot <- ggplot(final, aes(x = reef_habitat, y = mean, fill = sea_urchin_species)) +
+  
+  geom_col(position = "dodge", width = 0.8) +
+  
+  geom_errorbar(aes(ymin = mean - err, ymax = mean + err), 
+                position = position_dodge(0.8), 
+                width = 0.3)
+
+mass_plot
+```
+
+In this example, the `fill` call tells R, "These are groups that I want to graph separately."
+
+We won't go through all the code for this graph, but you can format this professionally for publication using functions within `ggplot()`.
+
+```{r}
+mass_plot_pub <- ggplot(final, aes(x = reef_habitat, y = mean, fill = sea_urchin_species)) +
+  
+  geom_col(position = "dodge", width = 0.8, color = "black") +
+  
+  geom_errorbar(aes(ymin = mean - err, ymax = mean + err), position = position_dodge(0.8), width = 0.3) +
+  
+  scale_y_continuous(expand = c(0,0), limits = c(0, 24)) +
+  
+  scale_fill_manual(values = c("#616161", "#adadad")) +
+  
+  theme_minimal() +
+  
+  labs(x = "Reef Habitat",
+       y = "Average mass (g)", 
+       fill = "Urchin species")
+
+mass_plot_pub
+```
+
+We can also create a scatter plot. The first thing we'll have to do is filter the `urchins2` data frame to only include observations from the back reef.
+
+```{r}
+back_reef <- urchins2 %>% 
+  
+  filter(reef_habitat == "Back Reef")
+
+back_reef
+```
+
+Now we can use this data frame to feed into ggplot.
+
+```{r}
+scatter <- ggplot(back_reef, aes(x = sea_urchin_mass_g, y = sea_urchin_spine_length_cm)) +
+  
+  geom_point() +
+  
+  geom_smooth(method = lm)
+
+scatter
+```
+
+Here's the code for making this plot look professional:
+
+```{r}
+scatter_pub <- ggplot(back_reef, aes(x = sea_urchin_mass_g, y = sea_urchin_spine_length_cm)) +
+  
+  geom_point(size = 2) +
+  
+  geom_smooth(method = lm, colour = "black") +
+  
+  theme_minimal() +
+  
+  labs(x = "Sea urchin mass (g)",
+       y = "Sea urchin spine length (cm)")
+
+scatter_pub
+```
+
+# 3. Cooler visualizations
+
+What if you wanted to see what trends between mass and spine length were for both species in the back reef?
+
+```{r}
+scatter_new <- ggplot(urchins2, aes(x = sea_urchin_mass_g, y = sea_urchin_spine_length_cm, group = sea_urchin_species)) +
+  
+  facet_wrap(~reef_habitat) +
+  
+  geom_point(aes(shape = sea_urchin_species), size = 2, alpha = 0.8) +
+  
+  scale_shape_manual(values = c(16, 2)) +
+  
+  geom_smooth(method = lm, color = "red") +
+  
+  theme_minimal() +
+  
+  labs(x = "Sea urchin mass (g)", 
+       y = "Sea urchin spine length (cm)",
+       shape = "Sea urchin species")
+
+scatter_new
+```
+
+RStudio has published many cheat sheets for commonly used packages. The one for `ggplot2` outlines a lot of the functions that you'll need to make professional looking figures: https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf
+
+And if you're interested in experimenting with color, there is a reference sheet for that too: http://sape.inf.usi.ch/quick-reference/ggplot2/colour
+
+Other useful functions in dplyr
+```{r}
+# select
+urchins3 <- select(urchins2, reef_habitat, sea_urchin_species, sea_urchin_mass_g)
+urchins3
+
+# mutate
+urchins4 <- urchins2 %>%
+  mutate(standardized_mass_g = (sea_urchin_mass_g - mean(sea_urchin_mass_g)) / sd(sea_urchin_mass_g))  %>%
+  mutate(standardized_spine_cm = (sea_urchin_spine_length_cm - mean(sea_urchin_spine_length_cm) / sd(sea_urchin_spine_length_cm) )) 
+
+urchins4
+
+scatter_new2 <- ggplot(urchins4, aes(x = standardized_mass_g, y = standardized_spine_cm, group = sea_urchin_species)) +
+  facet_wrap(~reef_habitat) +
+  geom_point(aes(shape = sea_urchin_species, color = sea_urchin_species), size = 2, alpha = 0.8) +
+  scale_shape_manual(values = c(21, 22)) +
+  geom_smooth(method = lm, color = "red") +
+  theme_minimal() +
+  labs(x = "Sea urchin mass (g)", 
+       y = "Sea urchin spine length (cm)",
+       shape = "Sea urchin species", 
+       color = "Sea urchin species") 
+
+scatter_new2
+
+
+scatter_new
+```
