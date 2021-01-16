@@ -1,0 +1,238 @@
+---
+title: 'Intro to R: The Review!'
+author: "[your name here]"
+date: "18 January 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We learned _a lot_ of skills last quarter in DAnC. You should be proud of yourselves! This is a little review of everything we learned.  
+
+# 1. Assignment operator, functions, and subsetting
+
+We'll start with the basics: assigning values to objects using the assignment operator `<-`. 
+
+```{r}
+
+apple <- 5
+
+orange <- 3
+
+```
+
+Then, we learned how to use functions in R. There are many functions out there to do the work you want!
+
+```{r}
+
+sum(apple, orange)
+
+```
+
+However, we're not stuck with simple numbers! We can get more complex with our objects.
+
+```{r}
+
+apple_weights <- c(0.3, 0.2, 0.25, 0.29)
+
+orange_weights <- c(0.2, 0.18, 0.25, 0.24)
+
+fruits <- c("apple", "orange", "banana", "pear", "persimmon", "grapefruit")
+
+```
+
+Then, we can subset our data using `[]`. Let's say we want the first apple weight.
+
+```{r}
+
+apple_weights[1]
+
+```
+
+Now, let's say we want all the orange weights that are less than 0.24.
+```{r}
+
+orange_weights[orange_weights < 0.24]
+
+```
+
+What would you write if you wanted to get the third element in `fruits`?
+
+```{r}
+
+
+
+```
+
+# 2. More complex data
+
+We're going to do a bit of set up by loading in our packages (aka libraries) and our data. Remember that packages are collections of functions that do specific things. Today, we're using the `tidyverse`, which is a suite of packages all designed to make your data analysis life easier.  
+For something fun this time (not that urchins aren't fun, we just worked with them for 3 months), we're going to be using data from Tidy Tuesday, a weekly social coding event where people work to visualize data from a dataset and share on Twitter! This data was from June 2020 on marble races; check out the [readme](https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-06-02/readme.md) for info on the columns and what kinds of data they hold!
+
+```{r set up}
+
+##################### libraries ##################### 
+
+# if you don't have the tidyverse yet, uncomment the code below and run it first!
+# install.packages("tidyverse")
+library(tidyverse)
+
+####################### data ######################## 
+
+marbles <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-06-02/marbles.csv')
+
+```
+
+# 3. Filtering observations from a data frame and the `%>%` operator 
+
+We have our `marbles` data loaded into RStudio. Let's say we want to know the mean race time for a specific marble - maybe the one called "Snowflake."  
+
+We can do this using functions and operators from the `tidyverse`, which is the package we loaded in. 
+
+The way we can get the mean race time for Snowflake with `tidyverse` functions is:  
+1. `filter()`: filter the data frame to only include observations for Snowflake  
+2. `summarize()`: calculate the mean race time  
+
+Both of these functions are from the `dplyr` package in the `tidyverse`. 
+
+We also learned how to use the pipe operator `%>%` from the `magrittr` package. This allows you to link functions together, which can be very handy! This is a pretty simple example, but we learned how powerful that operator can be (and will demonstrate later on).  
+
+```{r snowflake}
+
+snowflake_mean <- marbles %>% 
+  
+  filter(marble_name == "Snowflake") %>% 
+  
+  summarize(mean_time = mean(time_s))
+
+
+snowflake_mean
+```
+
+Try finding the mean time for another marble in the data set! 
+
+```{r your-turn}
+
+
+
+
+
+
+```
+
+We could do this for every marble in the data frame, but that would get tedious. To streamline things, we can use the `group_by()` function also from `dplyr` to tell R: think of this as a _group_.  
+
+```{r using-group_by()}
+
+all_means <- marbles %>% 
+  
+  group_by(marble_name) %>% 
+  
+  summarize(mean_time = mean(time_s))
+
+```
+
+# 4. Data visualization
+
+Now that we have our data, it's time for the fun part: visualizing it!  
+
+Let's say we're interested in the way that average time per lap is related to track length.  
+
+This is the most basic way to visualize it:
+
+```{r basic-visualization}
+
+ggplot(data = marbles, aes(x = track_length_m, y = avg_time_lap)) +
+  
+  geom_point() 
+
+```
+
+But... we can make this a lot more readable!  
+
+```{r readable-visualization}
+
+ggplot(data = marbles, aes(x = track_length_m, y = avg_time_lap)) +
+  
+  geom_point(size = 2) +
+  
+  geom_smooth(color = "royalblue", size = 2) +
+  
+  theme_bw() +
+  
+  labs(x = "Track length (m)",
+       y = "Average time per lap (s)",
+       title = "How does track length influence average time per lap?",
+       caption = "Data courtesy of Thomas Mock, #TidyTuesday",
+       color = "Team name") 
+
+```
+
+Ok, that was a pretty good plot. But let's say we're interested in the best marble. 
+
+We'll filter out observations to only include races with 1 lap. Then, we'll calculate the mean race time for each marble, and do some arrangement so that we can see the order better.
+
+```{r best-marble}
+
+best_marble <- marbles %>% 
+  
+  filter(number_laps == 1) %>% 
+  
+  group_by(marble_name) %>% 
+  
+  summarize(mean_times = mean(time_s)) %>% 
+  
+  arrange(-mean_times) %>% 
+  mutate(marble_name = fct_relevel(marble_name, marble_name))
+```
+
+Then, we can visualize the data! Again, you could do something basic:
+
+```{r basic-column}
+
+ggplot(data = best_marble, aes(x = marble_name, y = mean_times)) +
+  
+  geom_col()
+
+```
+
+Or, you could do something fun to look at!  
+
+First, we'll load in `viridis`, which is a package of color palettes to make choosing colors easier. There are **tons** of color palette packages out there, so lots to explore!
+
+```{r load-viridis}
+
+# if you don't have viridis yet, uncomment the line below and run it first!
+# install.packages("viridis")
+library(viridis)
+
+```
+
+Then, we can plot!
+
+```{r prettier-column}
+
+ggplot(data = best_marble, aes(x = marble_name, y = mean_times)) +
+  
+  geom_col(aes(fill = marble_name)) +
+  
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 35)) +
+  
+  scale_fill_viridis(option = "viridis", discrete = TRUE) +
+  
+  labs(x = "Marble name", 
+       y = "Average time per lap (s)",
+       title = "Which marble is the fastest?",
+       subtitle = "Prim is the winner!",
+       caption = "Data courtesy of Thomas Mock, #TidyTuesday") + 
+  
+  theme_minimal() +
+  
+  theme(legend.position = "none", 
+        axis.text.x = element_text(angle = 60, vjust = 0.6))
+
+```
+
+

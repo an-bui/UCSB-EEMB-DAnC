@@ -16,7 +16,7 @@ library(tidyverse)
 library(janitor)
 
 # data
-urchins <- read_csv(here::here("2020-12-03-intro_to_R-part03", "sea-urchin.csv"))
+urchins <- read_csv("sea-urchin.csv")
 ```
 
 # 1. Review of Intro to R part 2: 

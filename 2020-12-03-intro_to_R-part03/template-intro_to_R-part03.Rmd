@@ -16,7 +16,7 @@ library(tidyverse)
 library(janitor)
 
 # data
-urchins <- read_csv("sea-urchin.csv")
+urchins <- read_csv(here::here("2020-12-03-intro_to_R-part03", "sea-urchin.csv"))
 ```
 
 # 1. Review of Intro to R part 2: 
@@ -52,6 +52,7 @@ Let's say we only want to calculate the mean mass for urchins in the species tha
 ```{r}
 # filter urchins to only include the species of interest, "Echinometra mathaei"
 EM_only <- urchins2 %>% 
+  # filter for the species of interest
   filter(sea_urchin_species == "Echinometra mathaei")
 
 # look at the data frame
@@ -112,10 +113,26 @@ final
 To create a bar graph, we'll use the `ggplot2` package in the Tidyverse. You can make graphs in baseR (the built-in option), but `ggplot2` allows a lot more customization.
 
 ```{r}
-mass_plot <- ggplot(final, aes(x = reef_habitat, y = mean, fill = sea_urchin_species)) +
+# main function: ggplot()
+# ggplot() takes a lot of arguments
+# main arguments: data frame, aes()
+# aes() stands for aesthetics
+
+# telling ggplot() to use `final` as the data
+mass_plot <- ggplot(data = final, 
+                    # telling ggplot to use reef_habitat as x-axis
+                    aes(x = reef_habitat, 
+                        # use mean as the y-axis
+                        y = mean, 
+                        # color by sea urchin species
+                        fill = sea_urchin_species)) +
   
+  # geom_col: geometry that is a column graph
+  # position = "dodge": put columns next to each other instead of on top of each other
   geom_col(position = "dodge", width = 0.8) +
   
+  # geom_errorbar: adds error bars to your column graph
+  # first, tell geom_errorbar where error bars start and end
   geom_errorbar(aes(ymin = mean - err, ymax = mean + err), 
                 position = position_dodge(0.8), 
                 width = 0.3)
@@ -128,18 +145,27 @@ In this example, the `fill` call tells R, "These are groups that I want to graph
 We won't go through all the code for this graph, but you can format this professionally for publication using functions within `ggplot()`.
 
 ```{r}
+# takes same aes() as previous plot
 mass_plot_pub <- ggplot(final, aes(x = reef_habitat, y = mean, fill = sea_urchin_species)) +
   
+  # still making a column graph
   geom_col(position = "dodge", width = 0.8, color = "black") +
   
+  # still plotting standard error
   geom_errorbar(aes(ymin = mean - err, ymax = mean + err), position = position_dodge(0.8), width = 0.3) +
   
+  # allows you to customize the y-axis
   scale_y_continuous(expand = c(0,0), limits = c(0, 24)) +
   
+  # allows you to customize the colors that go into the fill
   scale_fill_manual(values = c("#616161", "#adadad")) +
   
-  theme_minimal() +
+  # built in themes
+  # others: theme_bw(), theme_dark()
+  # theme(): allows customization of your own theme
+  theme_minimal() + 
   
+  # change labels
   labs(x = "Reef Habitat",
        y = "Average mass (g)", 
        fill = "Urchin species")
@@ -151,7 +177,7 @@ We can also create a scatter plot. The first thing we'll have to do is filter th
 
 ```{r}
 back_reef <- urchins2 %>% 
-  
+  # filter to only include urchins from back reef
   filter(reef_habitat == "Back Reef")
 
 back_reef
@@ -160,10 +186,13 @@ back_reef
 Now we can use this data frame to feed into ggplot.
 
 ```{r}
-scatter <- ggplot(back_reef, aes(x = sea_urchin_mass_g, y = sea_urchin_spine_length_cm)) +
+scatter <- ggplot(back_reef, 
+                  aes(x = sea_urchin_mass_g, y = sea_urchin_spine_length_cm)) +
   
+  # geom_point(): create a scatter geometry
   geom_point() +
   
+  # geom_smooth(): creates a trend line geometry
   geom_smooth(method = lm)
 
 scatter
@@ -174,12 +203,16 @@ Here's the code for making this plot look professional:
 ```{r}
 scatter_pub <- ggplot(back_reef, aes(x = sea_urchin_mass_g, y = sea_urchin_spine_length_cm)) +
   
+  # change the size of the points to be bigger
   geom_point(size = 2) +
   
+  # change the color line to be black
   geom_smooth(method = lm, colour = "black") +
   
+  # take away the grey background and make gridlines grey
   theme_minimal() +
   
+  # change labels
   labs(x = "Sea urchin mass (g)",
        y = "Sea urchin spine length (cm)")
 
@@ -193,16 +226,23 @@ What if you wanted to see what trends between mass and spine length were for bot
 ```{r}
 scatter_new <- ggplot(urchins2, aes(x = sea_urchin_mass_g, y = sea_urchin_spine_length_cm, group = sea_urchin_species)) +
   
+  # facet_wrap allows separation of plots
   facet_wrap(~reef_habitat) +
   
+  # create a scatter plot
+  # alpha: changes transparency
   geom_point(aes(shape = sea_urchin_species), size = 2, alpha = 0.8) +
   
+  # customize shapes from geom_point
   scale_shape_manual(values = c(16, 2)) +
   
+  # add trendlines, change the color to be red
   geom_smooth(method = lm, color = "red") +
   
+  # get rid of grey background, make gridlines grey
   theme_minimal() +
   
+  # clean up plot labels
   labs(x = "Sea urchin mass (g)", 
        y = "Sea urchin spine length (cm)",
        shape = "Sea urchin species")
