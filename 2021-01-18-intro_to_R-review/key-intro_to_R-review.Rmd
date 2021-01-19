@@ -13,7 +13,7 @@ We learned _a lot_ of skills last quarter in DAnC. You should be proud of yourse
 
 # 1. Assignment operator, functions, and subsetting
 
-We'll start with the basics: assigning values to objects using the assignment operator `<-`. 
+We'll start with the basics: assigning values to objects using the assignment operator `<-`.  
 
 ```{r}
 
