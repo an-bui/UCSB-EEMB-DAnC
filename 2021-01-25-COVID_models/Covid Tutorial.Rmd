@@ -1,0 +1,53 @@
+---
+title: "Interactive Covid"
+author: "Jakob Kaare-Rasmussen"
+date: "1/23/2021"
+output: html_document
+---
+```{r}
+require(devtools)
+#install_version("usmap", version = "0.5.1", repos = "http://cran.us.r-project.org")
+library(usmap)
+library(ggplot2)
+```
+
+```{r}
+month<-read.csv("~/Desktop/NMcovidstart.csv")
+map<-read.csv("~/Desktop/NMcountyexample.csv")
+```
+
+```{r}
+plot(month$number_of_cases, col="blue", ylim=c(0,2000),xlim=c(0,35),main="Spread of Coronavirus in New Mexico",xlab="Days of Spread",ylab="Total Number of Cases",pch=1)
+
+plot(month$number_of_deaths, col="red", ylim=c(0,30),xlim=c(0,35),main="Spread of Coronavirus in New Mexico",xlab="Days of Spread",ylab="Total Number of Deaths",pch=1)
+```
+
+
+```{r}
+month$plot<-month$number_of_deaths
+month[c(1:12),3]<-NaN #replacing all 0 with NaN becasue you cant take a log of 0
+exponential.model.death<-lm(log(month$number_of_deaths)~ month$days_of_spread) #linier model for death
+counts.exponential.death<-exp(predict(exponential.model.death,list(month$days_of_spread))) # creating list of numbers that the model would predict
+summary(exponential.model.death) #test statistics
+
+exponential.model.cases <- lm(log(month$number_of_cases)~ month$days_of_spread)  #linier model for death
+counts.exponential.cases <- exp(predict(exponential.model.cases,list(month$days_of_spread)))# creating list of numbers that the model would predict
+summary(exponential.model.cases) #test statistics
+```
+```{r}
+plot(month$number_of_cases, col="blue", ylim=c(0,2000),xlim=c(0,35),main="Spread of Coronavirus in New Mexico",xlab="Days of Spread",ylab="Total Number of Cases",pch=1)
+lines(month$days_of_spread, counts.exponential.cases,lwd=2, col = "blue")
+
+
+plot(month$plot, col="red", ylim=c(0,30),xlim=c(0,35),main="Spread of Coronavirus in New Mexico",xlab="Days of Spread",ylab="Total Number of Deaths",pch=1)
+lines(month$days_of_spread,counts.exponential.death,lwd=2,col="red")
+```
+```{r}
+p<-plot_usmap(data=map,values="count","counties", labels=TRUE,label_color="red",cex=.1,include=("NM"))+
+  scale_fill_continuous(name = "Covid-19 Cases", label = scales::comma) + 
+  theme(legend.position = "right")+
+  labs(title="Coronavirus Cases in New Mexico",subtitle="March 21,2020")
+p$layers[[2]]$aes_params$size <- 2
+p
+```
+
