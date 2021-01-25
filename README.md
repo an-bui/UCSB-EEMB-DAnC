@@ -13,3 +13,4 @@ All materials for each meeting are in separate directories (folders). Each is a 
 
 ### Winter 2021
 - [2021-01-18](https://github.com/an-bui/UCSB-EEMB-DAnC/tree/main/2021-01-18-intro_to_R-review): review of all materials from fall quarter using marbles data
+- [2021-01-25](https://github.com/an-bui/UCSB-EEMB-DAnC/tree/main/2021-01-25-COVID_models): presentation of COVID-19 models based on data from New Mexico, US by Jakob Kaare-Rasmussen
