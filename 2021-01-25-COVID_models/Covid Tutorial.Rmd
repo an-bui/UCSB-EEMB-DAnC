@@ -12,8 +12,8 @@ library(ggplot2)
 ```
 
 ```{r}
-month<-read.csv("~/Desktop/NMcovidstart.csv")
-map<-read.csv("~/Desktop/NMcountyexample.csv")
+month<-read.csv(here::here("2021-01-25-COVID_models", "NMcovidstart.csv"))
+map<-read.csv(here::here("2021-01-25-COVID_models", "NMcountyexample.csv"))
 ```
 
 ```{r}

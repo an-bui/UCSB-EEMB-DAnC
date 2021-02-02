@@ -1,0 +1,85 @@
+---
+title: "ZOMBIES"
+author: "Tatum Katz"
+date: "2/1/2021"
+output: html_document
+---
+
+# For more: https://cran.r-project.org/web/packages/deSolve/vignettes/deSolve.pdf
+
+## Model specification
+
+```{r}
+
+parameters <- c(beta = .3,
+                gamma = .2
+                )
+
+```
+
+## State variables
+
+```{r}
+
+state <- c(S = 100,
+           I = 1,
+           R = 0)
+
+```
+
+## Model equations
+
+```{r}
+
+zombe<-function(t, state, parameters) {
+ with(as.list(c(state, parameters)),{
+  # rate of change
+  dS <- -beta*S*I
+  dI <- beta*S*I - gamma*I
+  dR <- gamma*I
+
+  # return the rate of change
+  list(c(dS, dI, dR))
+ }) # end with(as.list ...
+}
+
+```
+
+## Model application
+
+```{r}
+
+times <- seq(0, 100, by = 0.01)
+
+library(deSolve)
+
+out <- as.data.frame(ode(y = state, times = times, func = zombe, parms = parameters))
+
+head(out)
+
+```
+
+## Plot the model results
+
+```{r}
+
+library(ggplot2)
+
+ggplot(out, aes(x=time))+
+  geom_line(aes(y=S,colour="Susceptible"))+
+  geom_line(aes(y=I,colour="Infected"))+
+  geom_line(aes(y=R,colour="Recovered"))+
+  ylab("Number of Individuals")
+
+```
+
+
+
+
+
+
+
+
+
+
+
