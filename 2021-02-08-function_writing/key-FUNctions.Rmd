@@ -30,7 +30,6 @@ mean(dat)
 # making some fake data to put into the plot
 yaxis <- sqrt(dat) + 3
 
-# try using plot() to make a plot below!
 plot(x = dat, y = yaxis)
 ```
 
@@ -71,9 +70,12 @@ f_to_c(78)
 
 ## Formatting note
 
-The curly brackets in functions are really important for making sure the function code actually works. You can save yourself a headache when you're writing a function if you immediately hit enter a bunch of times after opening up your brackets. After you're done writing your function, you can delete all the extraneous space. This ensures that you're not accidentally deleting your brackets!
+The curly brackets in functions are really important for making sure the function code actually works. You can save yourself a headache when you're writing a function if you immediately hit enter a bunch of times after opening up your brackets. After you're done writing your function, you can delete all the extraneous space. This ensures that you're not accidentally deleting your brackets!  
 
-Try writing a function that converts celsius to fahrenheit called `c_to_f` below:
+Try writing a function called `c_to_f` that converts celsius to fahrenheit! Remember, the formula is:
+
+$C*1.8 + 32 = F$
+
 ```{r}
 
 c_to_f <- function(x) {
@@ -85,22 +87,54 @@ c_to_f <- function(x) {
 
 And check to see if it works!
 ```{r}
-c_to_f(28)
+
+
+
 ```
 
 
 ## A bit fancier
 
-Let's say that sometimes we want to convert between celsius, fahrenheit, and kelvin. We can write a function with more than one argument and incorporate `if()` statements in order to be able to do that.  
+Let's say that we want to convert between celsius and fahrenheit, but we don't want to have two separate functions for each. We can write a function with more than one argument and incorporate `if()` statements in order to be able to do that.  
 
-In order to wrap our heads around this, let's think of the function we just wrote, `f_to_c()`. You could write a separate function every time you wanted to convert between temperatures: `c_to_f()` to convert from celsius to fahrenheit, `c_to_k()` to convert from celsius to kelvin, and so on and so forth.  
+In order to wrap our heads around this, let's think of the functions we just wrote, `f_to_c()` and `c_to_f()`. We can put all of the components of those functions into one, and designate arguments for switching between each conversion. It's like compressing a bunch of different operations (the conversion) into one thing (the function), and calling the right conversion every time you wanted to use the function (by using the arguments).  
 
-However, this would get really tedious! For this reason, we can put all of the components of those functions into one, and designate arguments for switching between each conversion. It's like compressing a bunch of different operations (the conversion) into one thing (the function), and calling the right conversion every time you wanted to use the function (by using the arguments).  
-
-Here, we'll use the `function()` structure to make a function called `temp.conv` that converts between celsius, fahrenheit, and kelvin. Inside the function, we'll use `if()` statements to switch between all those conversion equations. The `if()` statement allows us to say:  
+Here, we'll use the `function()` structure to make a function called `temp.conv` that converts between celsius and fahrenheit. Inside the function, we'll use `if()` statements to switch between all those conversion equations. The `if()` statement allows us to say:  
 - **If** the inputs are celsius and fahrenheit, then use this conversion: $x*1.8 +32$.  
-- **If** the inputs are celsius and kelvin, then use this conversion: $x + 273.15$.  
-And so on.
+- **If** the inputs are fahrenheit and celsius, then use this conversion: $\frac{x-32}{1.8}$.  
+
+```{r}
+             # arguments in: from, to, and the temperature
+temp.conv <- function(from, to, x) {
+  
+  # if `from` is "celsius" and `to` is "fahrenheit", then
+  if(from == "celsius" & to == "fahrenheit") {
+    # convert from celsius to fahrenheit
+    convert <- x*1.8 + 32
+  }
+  
+  # if `from` is "fahrenheit" and `to` is "celsius", then
+  if(from == "fahrenheit" & to == "celsius") {
+    # convert from fahrenheit to celsius
+    convert <- (x - 32)/1.8
+  }
+
+  # return the converted value
+  return(convert)
+}
+```
+
+Let's try it out! I'll try converting 25 degrees celsius into fahrenheit.
+```{r}
+temp.conv("celsius", "fahrenheit", 25)
+```
+
+Try it out below!
+```{r}
+
+```
+
+If you want to incorporate different types of arguments into your function, you can use the or operator: `||`
 
 ```{r}
              # arguments in: from, to, and the temperature
@@ -112,56 +146,21 @@ temp.conv <- function(from, to, x) {
     convert <- x*1.8 + 32
   }
   
-  # if `from` is "celsius" or "c", and `to` is "kelvin" or "k", then
-  if(from == "celsius" || from == "c" & to == "kelvin" || to == "k") {
-    # convert from celsius to kelvin
-    convert <- x + 273.15
-  }
-  
   # if `from` is "fahrenheit" or "f", and `to` is "celsius" or "c", then
   if(from == "fahrenheit" || from == "f" & to == "celsius" || to == "c") {
-    # convert from fahrenheit to kelvin
+    # convert from fahrenheit to celsius
     convert <- (x - 32)/1.8
   }
 
-  # if `from` is "fahrenheit" or "f", and `to` is "kelvin" or "k", then
-  if(from == "fahrenheit" || from == "f" & to == "kelvin" || to == "k") {
-    # convert from fahrenheit to kelvin
-    convert <- (x - 32) * (5/9) + 273.15
-  }
-
-  # if `from` is "kelvin" or "k", and `to` is "fahrenheit" or "f", then
-  if(from == "kelvin" || from == "k" & to == "fahrenheit" || to == "f") {
-    # convert from kelvin to fahrenheit
-    convert <- (x - 273.15) * (9/5) + 32
-  }
-
-  # if `from` is "kelvin" or "k", and `to` is "celsius" or "c", then
-  if(from == "kelvin" || from == "k" & to == "celsius" || to == "c") {
-    # convert from kelvin to celsius
-    convert <- 273.15 - x
-  }
-  
   # return the converted value
   return(convert)
 }
 ```
 
-Let's try it out! 
-```{r}
-temp.conv("celsius", "kelvin", 25)
-
-temp.conv("c", "k", 18)
-
-temp.conv("k", "celsius", 15)
-```
-
-Try it out below!
+Try using the function with the new arguments!
 ```{r}
 
 ```
-
-
 
 
 
