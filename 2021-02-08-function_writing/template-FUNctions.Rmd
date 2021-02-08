@@ -1,0 +1,169 @@
+---
+title: "Putting the fun in FUNctions"
+author: "your name here"
+date: "8 February 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This script was adapted from [Tanya Rogers](https://outsidethequadrat.weebly.com/), who adapted it from Umi Hoshijima, who adapted it from [Software Carpentry](https://swcarpentry.github.io/r-novice-inflammation/02-func-R/index.html)!
+
+# 1. What do functions do?
+
+**Functions** allow you to 'do' things in R. The basic structure of a function is always a term with parentheses, and your inputs go in those parentheses as **arguments**. For example:  
+
+- `mean()` is a function that lets you **take the mean** of the input.  
+
+```{r}
+# making some data
+dat <- c(3, 5, 6, 9)
+
+mean(dat)
+```
+
+- `plot()` is a function that allows you to **make a plot**, and the arguments lets you customize that plot.  
+
+```{r}
+# making some fake data to put into the plot
+yaxis <- sqrt(dat) + 3
+
+# try using plot() to make a plot below!
+
+
+
+```
+
+# 2. Writing your own functions
+
+Sometimes R doesn't have the function you want. That's ok, because you can write your own! The function called `function()` lets you write a function. The basic structure is:
+
+function.name <- function(arguments) {  
+      some operations here using those arguments  
+      return(output of those operations)  
+}  
+
+Let's put that into practice by writing a function to convert temperature values!  
+
+The US uses fahrenheit, bleh. Let's convert that into celsius. The formula for converting fahrenheit into celsius is:  
+
+$C = \frac{F-32}{1.8}$
+
+And the formula for converting celsius into fahrenheit is:
+
+$F = C*1.8 + 32$
+
+We can write a function called `f_to_c` that converts fahrenheit to celsius.
+
+```{r}
+
+f_to_c <- function(x) {
+  convert <- (x - 32)/1.8
+  return(convert)
+}
+
+```
+
+Yay! Now, we can see what 78 fahrenheit is in celsius.
+```{r}
+f_to_c(78)
+```
+
+## Formatting note
+
+The curly brackets in functions are really important for making sure the function code actually works. You can save yourself a headache when you're writing a function if you immediately hit enter a bunch of times after opening up your brackets. After you're done writing your function, you can delete all the extraneous space. This ensures that you're not accidentally deleting your brackets!
+
+Try writing a function that converts celsius to fahrenheit called `c_to_f` below:
+```{r}
+
+
+
+
+```
+
+And check to see if it works!
+```{r}
+
+
+
+```
+
+
+## A bit fancier
+
+Let's say that sometimes we want to convert between celsius, fahrenheit, and kelvin. We can write a function with more than one argument and incorporate `if()` statements in order to be able to do that.  
+
+In order to wrap our heads around this, let's think of the function we just wrote, `f_to_c()`. You could write a separate function every time you wanted to convert between temperatures: `c_to_f()` to convert from celsius to fahrenheit, `c_to_k()` to convert from celsius to kelvin, and so on and so forth.  
+
+However, this would get really tedious! For this reason, we can put all of the components of those functions into one, and designate arguments for switching between each conversion. It's like compressing a bunch of different operations (the conversion) into one thing (the function), and calling the right conversion every time you wanted to use the function (by using the arguments).  
+
+Here, we'll use the `function()` structure to make a function called `temp.conv` that converts between celsius, fahrenheit, and kelvin. Inside the function, we'll use `if()` statements to switch between all those conversion equations. The `if()` statement allows us to say:  
+- **If** the inputs are celsius and fahrenheit, then use this conversion: $x*1.8 +32$.  
+- **If** the inputs are celsius and kelvin, then use this conversion: $x + 273.15$.  
+And so on.
+
+```{r}
+             # arguments in: from, to, and the temperature
+temp.conv <- function(from, to, x) {
+  
+  # if `from` is "celsius" or "c", and `to` is "fahrenheit" or "f", then
+  if(from == "celsius" || from == "c" & to == "fahrenheit" || to == "f") {
+    # convert from celsius to fahrenheit
+    convert <- x*1.8 + 32
+  }
+  
+  # if `from` is "celsius" or "c", and `to` is "kelvin" or "k", then
+  if(from == "celsius" || from == "c" & to == "kelvin" || to == "k") {
+    # convert from celsius to kelvin
+    convert <- x + 273.15
+  }
+  
+  # if `from` is "fahrenheit" or "f", and `to` is "celsius" or "c", then
+  if(from == "fahrenheit" || from == "f" & to == "celsius" || to == "c") {
+    # convert from fahrenheit to kelvin
+    convert <- (x - 32)/1.8
+  }
+
+  # if `from` is "fahrenheit" or "f", and `to` is "kelvin" or "k", then
+  if(from == "fahrenheit" || from == "f" & to == "kelvin" || to == "k") {
+    # convert from fahrenheit to kelvin
+    convert <- (x - 32) * (5/9) + 273.15
+  }
+
+  # if `from` is "kelvin" or "k", and `to` is "fahrenheit" or "f", then
+  if(from == "kelvin" || from == "k" & to == "fahrenheit" || to == "f") {
+    # convert from kelvin to fahrenheit
+    convert <- (x - 273.15) * (9/5) + 32
+  }
+
+  # if `from` is "kelvin" or "k", and `to` is "celsius" or "c", then
+  if(from == "kelvin" || from == "k" & to == "celsius" || to == "c") {
+    # convert from kelvin to celsius
+    convert <- 273.15 - x
+  }
+  
+  # return the converted value
+  return(convert)
+}
+```
+
+Let's try it out! 
+```{r}
+temp.conv("celsius", "kelvin", 25)
+
+temp.conv("c", "k", 18)
+
+temp.conv("k", "celsius", 15)
+```
+
+Try it out below!
+```{r}
+
+```
+
+
+
+
+
