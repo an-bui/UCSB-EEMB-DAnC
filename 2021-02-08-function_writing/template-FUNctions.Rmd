@@ -55,9 +55,14 @@ $F = C*1.8 + 32$
 We can write a function called `f_to_c` that converts fahrenheit to celsius.
 
 ```{r}
-
+# create a function called `f_to_c`
+                    # takes the argument `x`
 f_to_c <- function(x) {
+  # calculating (x - 32)/1.8
+  # assign temporary variable called convert
   convert <- (x - 32)/1.8
+  
+  # return the value of convert
   return(convert)
 }
 
@@ -78,15 +83,24 @@ $C*1.8 + 32 = F$
 
 ```{r}
 
+# creating a function called c_to_f
+                  # using argument temp
+c_to_f <- function(temp) {
+  
+  # calculating conversion as temp * 1.8 + 32
+  conversion <- temp*1.8 + 32
+  
+  # returning value of conversion
+  return(conversion)
 
-
+}
 
 ```
 
 And check to see if it works!
 ```{r}
 
-
+c_to_f(26)
 
 ```
 
@@ -129,7 +143,7 @@ temp.conv("celsius", "fahrenheit", 25)
 
 Try it out below!
 ```{r}
-
+temp.conv("fahrenheit", "celsius", 80)
 ```
 
 If you want to incorporate different types of arguments into your function, you can use the or operator: `||`
@@ -157,7 +171,9 @@ temp.conv <- function(from, to, x) {
 
 Try using the function with the new arguments!
 ```{r}
+temp.conv(from = "f", to = "c", 50)
 
+temp.conv("c", 45)
 ```
 
 

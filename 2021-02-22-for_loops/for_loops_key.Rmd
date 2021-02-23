@@ -1,0 +1,212 @@
+---
+title: "DANC - February 22, 2021"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+#### A. Why use the `for()` loop?
+Imagine trying to do an iterative process over a large dataset - 
+```{r}
+install.packages("vegan", dependences = TRUE) # install vegan package
+
+library(vegan) # call vegan package
+
+data(dune) # load dataset within the vegan package
+
+help("dune") # learn more about this data set
+# The dune meadow vegetation data, dune, has cover class values of 30 species (columns) on 20 sites (rows). 
+
+# Perhaps I want to know the abundance of each plant species across these sites: 
+sum(dune[, 1]) # the sum function "sums" our provided argument, which calls the first column of the dune dataset by indexing (using the brackets)
+## what if we wanted to sum the first row instead? how would that code change? 
+sum(dune[, 2])
+sum(dune[, 3])
+sum(dune[, 4])
+sum(dune[, 5])
+# and so forth - is this the most efficient way to do something? 
+```
+
+#### B. Let's write a `for()` loop 
+
+* The basic structure of a for loop is: 
+
+for (variable in a collection of variables) {  
+expression(s)  
+}  
+
+Dr. Allison Horst's: awesome diagram that explains for loops
+https://twitter.com/allison_horst/status/1290774616038809600/photo/1
+
+For loops in three easy steps:
+
+1) What's your desired objective? For example, "I want to repeat the sum of all the columns in my data frame." This is your "for loop". 
+2) Where's your data? Usually this data is a vector (a string of things that are of the same kind, for example, a sequence of numbers: 1, 2, 3, 4)
+3) Where are you going to put your result? You'll need to make a "holding vector" or a place to put your answer. Usually this is an empty vector that is filled with NA or NaN placeholders. Any data generated within your loop will be not be saved, unless you use **variable assignment** within the loop. 
+
+* For example, if we wanted to add 5 to each element of the vector x, and store it in vector y, we could do it with a `for()` loop:
+```{r}
+x <- 1:10 # make a vector to iterate over
+x
+
+y <- rep(NaN, length(x))  # create an object y to hold the answer by repeating the number 0 into a vector of the same length as x (i.e., 9 slots)
+y
+
+for (i in 1:length(x)) { # for every number in the vector x, starting at the first variable in position 1 to the last variable in position 10
+  
+  y[i] <- x[i] + 5 # add five to it and store it in the vector y, our new values will overwrite y 
+
+}
+
+y
+
+# remember "i" refers to positions in a vector, NOT the number
+```
+
+* However, in R, we can do this much more efficiently using the <- command (because x is vectorized), so you don't need a `for()` loop for everything!
+```{r}
+y <- x + 5
+
+y
+```
+
+*'i' can be whatever you like, it just has to be consistent across the loop!
+```{r}
+x <- 1:10
+x
+
+y <- rep(NaN, length(x)) 
+y
+
+for (puppies in 1:length(x)) {
+  
+  y[puppies] <- x[puppies] + 1
+  
+}
+
+y
+```
+
+* Example using a logical statement 
+```{r}
+x <- c(1,3,5,7,9,11)
+x
+
+emptydat <- rep(NaN, length(x))
+
+for (i in 1:length(x)){
+   emptydat[i] <- ifelse(x[i] > 5, "yes", "no")
+}
+
+emptydat
+```
+
+* Back to our dune example, how would we write loop to find each plant species abundance across the 20 sampled sites?
+```{r}
+# Step 1: create a place to put our data 
+holding.vector <- rep(NaN, ncol(dune))
+holding.vector
+
+# Step 2: write our for loop
+for(i in 1:length(holding.vector)) { # for element, i, from position 1 to the length of our holding vector
+  
+  holding.vector[i] <- sum(dune[,i]) # sum the i-th column in the dune dataset and place that answer in the holding vector in position i
+  
+}
+
+holding.vector
+
+sum(dune[, 1])
+sum(dune[, 2])
+sum(dune[, 3])
+sum(dune[, 4])
+sum(dune[, 5])
+
+# but remember, sometimes there's functions to do these things too
+colSums(dune)
+```
+
+#### Exercise 1
+
+* Write a `for()` loop that (1) iterates over the numbers 1 to 10, (2) calculates the cube of each number and (3) saves the output in a storage vector. 
+```{r}
+x <- 1:10
+
+y <- rep(NaN, length(x))
+
+for(i in 1:length(x)) { # for(i in x) is also correct...
+  y[i] <- x[i]^3
+}
+
+y
+```
+
+#### Exercise 2
+
+* Write a `for()` loop that (1) iterates over the numbers 1 to 10, (2) adds each variable to the variable that succeeds it in vector x (e.g., 1 + 2; 2 + 3; etc.) and (3) saves the output in a storage vector.
+```{r}
+x <- 1:10
+
+y <- rep(NaN, length(x) - 1) 
+ 
+for (i in 1:9) { # or 2:length(x) - 1
+  
+  y[i] <- x[i] + x[i + 1] 
+  
+}
+
+y
+```
+
+#### Exercise 3
+
+* Write a `for()` loop that (1) iterates over the all the rows in the dune dataset in sequential order, (2) calculates the mean number of plant species within a site (remember, sites refer to the rows in the matrix) and (2) saves the output in a storage vector. HINT: you'll need make each row numeric BEFORE you calculate its mean with the as.numeric() function.
+```{r}
+holding.vector <- rep(NaN, nrow(dune))
+holding.vector
+
+for(i in 1:length(holding.vector)) { # for element, i, from position 1 to the length of our holding vector
+  
+  holding.vector[i] <- mean(as.numeric(dune[i,])) # sum the i-th column in the dune dataset and place that answer in the holding vector in position i
+  
+}
+
+holding.vector
+
+# again, remember if your task is something straightforward like taking a mean, there's probably a function for it
+rowMeans(dune)
+```
+
+* You can also write nested for loops: 
+```{r}
+x <- 1:10
+x
+
+y <- rep(NaN, length(x))
+y
+
+for (i in 1:length(x)) {
+  
+   temp.number <- x[i] + 1 # what happens to "temp.number" each time a for loop repeats and iteration? 
+  
+  for (j in 1:length(x)) {
+  
+    y[i] <- temp.number - 1 
+  
+  }
+  
+}
+
+y
+```
+### Exercise 4
+Write a nested for loop of your choice!
+```{r}
+
+```
+
+
+
+
+
+
